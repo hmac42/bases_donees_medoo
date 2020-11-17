@@ -1,64 +1,59 @@
 <?php
 session_start();
 include_once("testmedoo.php");
+$codetoken = null;
+$recup_code = null;
+
+if (isset($_POST['Envoyer'])) {
+
+    if (!empty($_POST['codeReinit']) || !empty($_POST['passwordConfirm']) || !empty($_POST['passwordConfirm1'])) {
+        $codeReinit = $_POST['codeReinit'];
+        $passwordConfirm = $_POST['passwordConfirm'];
+        $passwordConfirm1 = $_POST['passwordConfirm1'];
+
+        $codeVerif = $database->count("recuperations", "code", ["code" => $codeReinit]);
+        if ($codeVerif >= 1) {
+            $codetoken = isset($_GET["codetoken"]);
+            $recup_code = isset($_GET["recup_code"]);
+            echo $recup_code."  ".$codetoken; 
 
 
+            // je suis reste la, cette partie du code ne marche pas
 
 
-$reinitPassword = isset($_POST['passwordConfirm']);
-$reinitPassword1 = isset($_POST['passwordConfirm1']);
-
-if (isset($_POST['Envoyer1'])) {
-
-    if ($reinitPassword = $reinitPassword1) {
-        $options = ['cost' => 12,];
-        $condMDP = '/^(?=.{8,}$)(?=.*[A-Z])(?=.*[a-z])(?=.*\d)/';
-        $reinitPasswordCrypt = password_hash($_POST['passwordConfirm'], PASSWORD_BCRYPT, $options);
-        //$dbco = new PDO("mysql:host=$servername; dbname=medoo_n2_exo", $username, $passwordDB);
-        //$dbco->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        //$verifEmail = $dbco->prepare("SELECT login FROM connexions WHERE login=? AND essaieconn = 'A'");
-        //$verifEmail->execute([$verifEmail]);
-        //$user = $verifEmail->fetch();
-
-        $verifEmail = $database->select("recuperations", "email", ["essaieconn" => 'A']);
-       
-        if ($verifEmail === true) {
-            //$newpassword = $dbco->prepare("UPDATE utilisateurs SET motDePasse = ? WHERE email = '$user'");
-            //$newpassword->execute([$reinitPasswordCrypt]);
-            $verifEmail = $database->update("utilisateurs",
-                ["motDePasse"=>$reinitPasswordCrypt,
-                "email"=>$verifEmail]);
-            $database->delete("recuperations", ["AND" => ["code" => $codeReinit]]);
             
-            echo "mot de passe reinitialisé";
-        }else{echo"pas bon";}
-        
+            /*if ($passwordConfirm == $passwordConfirm1) {
+                $options = ['cost' => 12,];
+                $condMDP = '/^(?=.{8,}$)(?=.*[A-Z])(?=.*[a-z])(?=.*\d)/';
+                $reinitPasswordCrypt = password_hash($_POST['passwordConfirm'], PASSWORD_BCRYPT, $options);
+                $verifEmail = $database->select("recuperations", "email", ["code" =>  $recup_code]);
+                    var_dump($verifEmail);
+            } else {
+                # code...
+            }*/
+        } else {
+            echo "code pas bon";
+        }
     } else {
-        echo "mot de passe passe n'est pas bon!";
+        echo "les champs sont vides";
     }
-} else {
-    echo "remplissez les cases!";
 }
-
-
 ?>
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mnewpassword.php</title>
+    <title>mnewpassword</title>
 </head>
 
 <body>
-    <form action="mnewpassword.php" method="post">
+    <form action="mnewpassword.php?recup_code=<?= $recup_code ?>&codetoken=<?= $codetoken ?>" method="post">
+        <p><label for="">Entrez le code de reinitialisation : <input type="text" name="codeReinit"></p></label>
         <p><label for="">Entrez votre nouveau mot de passe : <input type="text" name="passwordConfirm" id=""></p>
         <p><label for="">Confirmez votre mot de passe : <input type="text" name="passwordConfirm1" id=""></p>
-        <input type="submit" value="Envoyer" name="Envoyer1">
+        <p><input type="submit" value="Envoyer" name="Envoyer"></p>
     </form>
 </body>
 

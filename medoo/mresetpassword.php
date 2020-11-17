@@ -8,43 +8,46 @@ include_once("testmedoo.php");
 if (isset($_POST['Envoyer'])) {
     $emailConfirm = $_POST['emailConfirm'];
     if (!empty($emailConfirm)) {
-
-        $verifEmail = $database->select("connexions", "login", [
+        
+        $verifEmail = $database->count("connexions", "login", [
             "login" => $emailConfirm,
             "essaieconn" => 'A'
         ]);
 
-
-        if ($verifEmail) {
-            $_SESSION['emailConfirm'] = $emailConfirm;
+            var_dump($verifEmail) ;
+        if ($verifEmail = 4) {
             $recup_code = "";
             for ($i = 0; $i < 8; $i++) {
                 $recup_code .= mt_rand(0, 9);
             }
-            $_SESSION['recup-code'] = $recup_code;
+            
             $email_exist = $database->count("recuperations", "email", ["email" => $emailConfirm]);
 
-            if ($email_exist = 1) {
+            if ($email_exist >= 1) {
                 $database->update("recuperations", [
                     "email" => $emailConfirm,
                     "code" => $recup_code
                 ]);
                 echo "entrée dans la base de données";
+                
             } else {
                 $database->insert("recuperations", [
                     "email" => $emailConfirm,
                     "code" => $recup_code
                 ]);
+                
             }
+            $codetoken = bin2hex(random_bytes(32));
 
             include 'msendemail.php';
             $to = $_POST['emailConfirm'];
             $subject = "test\r\n";
             $subject .= "MIME-Version: 1.0\r\n";
             $subject .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-            $body = 'votre code de recuperation est ' . $recup_code . ' test 2 <html><a href="http://localhost/medoo/mcodenewpassword.php">lien</a></html>';
+            $body = 'votre code de recuperation est ' . $recup_code . ' test 2 <html><a href="http://localhost/medoo/mnewpassword.php?recup_code='.$recup_code.'&codetoken='.$codetoken.'">lien</a></html>';
             send_mail($to, $subject, $body);
-            header("location: mcodenewpassword.php");
+            
+            
 
 
 
